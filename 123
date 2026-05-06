@@ -1,0 +1,357 @@
+  import 'dart:math';
+
+  class Mug {
+    final int volumeMl;
+    int currentMl;
+
+    Mug({required this.volumeMl, int initialMl = 0}) : currentMl = initialMl;
+
+    int drink(int ml) {
+      if (ml <= 0) return 0;
+      int taken = min(ml, currentMl);
+      currentMl -= taken;
+      return taken;
+    }
+
+    void fill(int ml) {
+      if (ml <= 0) return;
+      currentMl = min(volumeMl, currentMl + ml);
+    }
+
+    @override
+    String toString() => 'Mug($currentMl/$volumeMl ml)';
+  }
+
+  class Person {
+    final String name;
+
+    Person(this.name);
+
+    void drinkFrom(Mug mug, int ml) {
+      int got = mug.drink(ml);
+      print('$name выпил(а) $got мл. В кружке осталось ${mug.currentMl} мл.');
+    }
+  }
+
+  class StorageSystem {
+    final String name;
+    final List<String> items = [];
+
+    StorageSystem(this.name);
+
+    void put(String item) => items.add(item);
+
+    bool take(String item) => items.remove(item);
+
+    @override
+    String toString() => '$name: $items';
+  }
+
+  class Wardrobe {
+    final List<StorageSystem> storages;
+
+    Wardrobe(this.storages);
+
+    bool putItem(String item) {
+      if (storages.isEmpty) return false;
+      storages.first.put(item);
+      return true;
+    }
+
+    bool takeItem(String item) {
+      for (final s in storages) {
+        if (s.take(item)) return true;
+      }
+      return false;
+    }
+
+    void show() {
+      print('Шкаф:');
+      for (final s in storages) {
+        print('  $s');
+      }
+    }
+  }
+
+  class Plate {
+    final double weightKg;
+    Plate(this.weightKg);
+
+    @override
+    String toString() => '${weightKg}кг';
+  }
+
+  class BarbellBar {
+    final double maxLoadKg;
+    final List<Plate> left = [];
+    final List<Plate> right = [];
+
+    BarbellBar({required this.maxLoadKg});
+
+    double get currentLoadKg {
+      double sum = 0;
+      for (final p in left) sum += p.weightKg;
+      for (final p in right) sum += p.weightKg;
+      return sum;
+    }
+
+    bool addLeft(Plate plate) {
+      if (currentLoadKg + plate.weightKg > maxLoadKg) return false;
+      left.add(plate);
+      return true;
+    }
+
+    bool addRight(Plate plate) {
+      if (currentLoadKg + plate.weightKg > maxLoadKg) return false;
+      right.add(plate);
+      return true;
+    }
+
+    @override
+    String toString() =>
+        'Гриф: нагрузка ${currentLoadKg.toStringAsFixed(1)}/${maxLoadKg.toStringAsFixed(1)} кг, '
+        'left=$left, right=$right';
+  }
+
+  class MoneyConverter {
+
+    final String base;
+    final Map<String, double> ratesToBase;
+
+    MoneyConverter({required this.base, required this.ratesToBase});
+
+    double convert(double amount, String from, String to) {
+      if (!ratesToBase.containsKey(from) || !ratesToBase.containsKey(to)) {
+        throw Exception('Неизвестная валюта: $from или $to');
+      }
+      double inBase = amount * ratesToBase[from]!;
+      double result = inBase / ratesToBase[to]!;
+      return result;
+    }
+  }
+
+  class MyNumber {
+    final double value;
+
+    MyNumber(this.value);
+
+    MyNumber operator +(MyNumber other) => MyNumber(value + other.value);
+    MyNumber operator -(MyNumber other) => MyNumber(value - other.value);
+    MyNumber operator *(MyNumber other) => MyNumber(value * other.value);
+    MyNumber operator /(MyNumber other) => MyNumber(value / other.value);
+
+    MyNumber operator -() => MyNumber(-value); 
+
+    @override
+    String toString() => value.toString();
+  }
+
+  enum CarState { stop, go, turnLeft, turnRight }
+
+  class Car {
+    CarState state = CarState.stop;
+
+    void stop() => state = CarState.stop;
+    void go() => state = CarState.go;
+    void turnLeft() => state = CarState.turnLeft;
+    void turnRight() => state = CarState.turnRight;
+
+    @override
+    String toString() => 'Car(state: $state)';
+  }
+
+  abstract class Shape {
+    double area();
+    String name();
+  }
+
+  class Rectangle extends Shape {
+    final double width;
+    final double height;
+
+    Rectangle(this.width, this.height);
+
+    @override
+    double area() => width * height;
+
+    @override
+    String name() => 'Прямоугольник';
+  }
+
+  class Triangle extends Shape {
+    final double base;
+    final double height;
+
+    Triangle(this.base, this.height);
+
+    @override
+    double area() => 0.5 * base * height;
+
+    @override
+    String name() => 'Треугольник';
+  }
+
+  class Circle extends Shape {
+    final double radius;
+
+    Circle(this.radius);
+
+    @override
+    double area() => pi * radius * radius;
+
+    @override
+    String name() => 'Окружность';
+  }
+
+  class BaseConverter {
+    String convert(String value, int fromBase, int toBase) {
+      int number = int.parse(value, radix: fromBase);
+      return number.toRadixString(toBase).toUpperCase();
+    }
+  }
+
+  class ShapeList {
+    final List<Shape> shapes = [];
+
+    void add(Shape shape) => shapes.add(shape);
+
+    Shape? maxAreaShape() {
+      if (shapes.isEmpty) return null;
+      Shape best = shapes.first;
+      for (final s in shapes) {
+        if (s.area() > best.area()) best = s;
+      }
+      return best;
+    }
+  }
+
+  abstract class Utensil {
+    String name();
+  }
+
+  class Fork extends Utensil {
+    @override
+    String name() => 'Вилка';
+  }
+
+  class Spoon extends Utensil {
+    @override
+    String name() => 'Ложка';
+  }
+
+  class Knife extends Utensil {
+    @override
+    String name() => 'Нож';
+  }
+
+  class Table {
+    final List<Utensil> items = [];
+
+    void put(Utensil utensil) => items.add(utensil);
+
+    bool removeByName(String utensilName) {
+      for (int i = 0; i < items.length; i++) {
+        if (items[i].name() == utensilName) {
+          items.removeAt(i);
+          return true;
+        }
+      }
+      return false;
+    }
+
+    void show() {
+      print('На столе: ${items.map((e) => e.name()).toList()}');
+    }
+  }
+
+  void main() {
+    print('Кружка и Человек');
+    final mug = Mug(volumeMl: 300, initialMl: 200);
+    final person = Person('Чибук');
+    print(mug);
+    person.drinkFrom(mug, 150);
+    person.drinkFrom(mug, 100);
+    mug.fill(250);
+    print('После долива: $mug');
+
+    print('\nШкаф');
+    final wardrobe = Wardrobe([
+      StorageSystem('Полка'),
+      StorageSystem('Ящик'),
+    ]);
+    wardrobe.putItem('Футболка');
+    wardrobe.putItem('Носки');
+    wardrobe.show();
+    print('Забрать "Носки": ${wardrobe.takeItem("Носки")}');
+    wardrobe.show();
+
+    print('\nГриф и блины');
+    final bar = BarbellBar(maxLoadKg: 60.0);
+    print('Добавить слева 20кг: ${bar.addLeft(Plate(20))}');
+    print('Добавить справа 20кг: ${bar.addRight(Plate(20))}');
+    print('Добавить справа 30кг (перегруз): ${bar.addRight(Plate(30))}');
+    print(bar);
+
+    print('\nКонвертация валют');
+    final converter = MoneyConverter(
+      base: 'USD',
+      ratesToBase: {
+        'USD': 1.0,
+        'EUR': 1.1,
+        'RUB': 0.011, 
+      },
+    );
+    double rubToEur = converter.convert(1000, 'RUB', 'EUR');
+    print('10000 RUB -> EUR = ${rubToEur.toStringAsFixed(2)}');
+
+    print('\nПерегрузка операций');
+    final a = MyNumber(10);
+    final b = MyNumber(3);
+    print('a+b = ${a + b}');
+    print('a-b = ${a - b}');
+    print('a*b = ${a * b}');
+    print('a/b = ${(a / b)}');
+    print('-a = ${-a}');
+
+    print('\nАвтомобиль(enum состояния)');
+    final car = Car();
+    print(car);
+    car.go();
+    print(car);
+    car.turnLeft();
+    print(car);
+    car.stop();
+    print(car);
+
+    print('\nФигуры');
+    final r = Rectangle(4, 5);
+    final t = Triangle(6, 3);
+    final c = Circle(2);
+    print('${r.name()} area=${r.area()}');
+    print('${t.name()} area=${t.area()}');
+    print('${c.name()} area=${c.area().toStringAsFixed(2)}');
+
+    print('\nСистемы счисления');
+    final baseConv = BaseConverter();
+    print('255 (10) -> (16) = ${baseConv.convert("255", 10, 16)}');
+    print('FF (16) -> (8) = ${baseConv.convert("FF", 16, 8)}');
+
+    print('\nМаксимальная площадь');
+    final shapeList = ShapeList();
+    shapeList.add(Rectangle(2, 10)); 
+    shapeList.add(Circle(3));        
+    shapeList.add(Triangle(10, 4));  
+    final best = shapeList.maxAreaShape();
+    if (best != null) {
+      print('Максимальная площадь у: ${best.name()}, area=${best.area()}');
+    }
+
+    print('\nСтол и приборы');
+    final table = Table();
+    table.put(Fork());
+    table.put(Spoon());
+    table.put(Knife());
+    table.show();
+    print('Убрать "Штопр": ${table.removeByName("Штопр")}');
+    table.show();
+  }
